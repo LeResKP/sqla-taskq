@@ -18,7 +18,14 @@ setup(name='taskq',
       include_package_data=True,
       zip_safe=False,
       install_requires=[
-          # -*- Extra requirements: -*-
+          'SQLAlchemy',
+          'transaction',
+          'python-daemon',
+          'zope.sqlalchemy',
+      ],
+      test_suite='nose.collector',
+      tests_require=[
+          'nose',
       ],
       entry_points="""
       # -*- Entry points: -*-
