@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import (
     Column,
     Integer,
@@ -20,17 +21,20 @@ from zope.sqlalchemy import ZopeTransactionExtension
 import transaction
 import inspect
 import importlib
+import logging
 
+log = logging.getLogger(__name__)
+
+sqlalchemy_url = 'sqlite:///taskq.db'
+if os.environ.get('TASKQ_SQLALCHEMY_URL'):
+    sqlalchemy_url = os.environ['TASKQ_SQLALCHEMY_URL']
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base(DBSession)
-engine = create_engine('sqlite:///taskq.db', echo=False)
+engine = create_engine(sqlalchemy_url, echo=False)
 DBSession.configure(bind=engine)
 Base.metadata.bind = engine
 Base.query = DBSession.query_property()
-
-import logging
-log = logging.getLogger(__name__)
 
 
 TASK_STATUS_WAITING = 'waiting'
