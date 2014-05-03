@@ -1,7 +1,30 @@
 import time
 import transaction
-from taskq import models
 from daemon import runner
+from taskq import models
+
+
+class TaskDaemonRunner(runner.DaemonRunner):
+
+    def _status(self):
+        pid = self.pidfile.read_pid()
+        message = []
+        if pid:
+            message += ['Daemon started with pid %s' % pid]
+        else:
+            message += ['Daemon not running']
+
+        tasks = models.Task.query.filter_by(
+            status=models.TASK_STATUS_WAITING).all()
+        message += ['Number of waiting tasks: %s' % len(tasks)]
+        runner.emit_message('\n'.join(message))
+
+    action_funcs = {
+        u'start': runner.DaemonRunner._start,
+        u'stop': runner.DaemonRunner._stop,
+        u'restart': runner.DaemonRunner._restart,
+        u'status': _status,
+    }
 
 
 class TaskRunner():
@@ -31,7 +54,7 @@ class TaskRunner():
 
 def main():
     app = TaskRunner()
-    daemon_runner = runner.DaemonRunner(app)
+    daemon_runner = TaskDaemonRunner(app)
     daemon_runner.do_action()
 
 
