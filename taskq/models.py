@@ -1,4 +1,5 @@
 import os
+import traceback
 from sqlalchemy import (
     Column,
     Integer,
@@ -40,6 +41,7 @@ Base.query = DBSession.query_property()
 TASK_STATUS_WAITING = 'waiting'
 TASK_STATUS_IN_PROGRESS = 'inprogress'
 TASK_STATUS_FINISHED = 'finished'
+TASK_STATUS_FAILED = 'failed'
 
 
 class Task(Base):
@@ -58,6 +60,7 @@ class Task(Base):
     description = Column(UnicodeText, nullable=False)
     result = Column(UnicodeText, nullable=True)
     status = Column(String, nullable=False, default=TASK_STATUS_WAITING)
+    owner = Column(String, nullable=True)
 
     def __init__(self):
         for p, d in self._func_params:
@@ -68,7 +71,7 @@ class Task(Base):
         self.load_func()
 
     @classmethod
-    def create(cls, func, args=None, kw=None, description=None):
+    def create(cls, func, args=None, kw=None, description=None, owner=None):
         with transaction.manager:
             task = cls()
             if inspect.ismethod(func):
@@ -90,6 +93,7 @@ class Task(Base):
 
             task._args = args
             task._kw = kw
+            task.owner = owner
 
             task.func = task.dump_func()
             task.status = TASK_STATUS_WAITING
@@ -130,5 +134,10 @@ class Task(Base):
         func = self.get_func()
         self._args = self._args or []
         self._kw = self._kw or {}
-        self.result = func(*self._args, **self._kw)
+        try:
+            self.result = func(*self._args, **self._kw)
+            self.status = TASK_STATUS_FINISHED
+        except:
+            self.result = traceback.format_exc()
+            self.status = TASK_STATUS_FAILED
         return self.result

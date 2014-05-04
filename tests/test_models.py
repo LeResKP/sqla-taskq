@@ -7,6 +7,7 @@ from taskq.models import (
     Base,
     Task,
 )
+import taskq.models as models
 
 
 def func4test(*args, **kw):
@@ -19,6 +20,10 @@ def func4testdoc(*args, **kw):
     This line should be ignored
     """
     return 'func4testdoc %s %s' % (args, kw)
+
+
+def func4testfailed(*args, **kw):
+    raise Exception('Failing function')
 
 
 class Class4Test(object):
@@ -158,6 +163,7 @@ class TestTask(unittest.TestCase):
         expected = 'func4test () {}'
         self.assertEqual(res, expected)
         self.assertEqual(task.result, expected)
+        self.assertEqual(task.status, models.TASK_STATUS_FINISHED)
 
         task = Task.create(func4test, [1, 2], {'a': 1, 'b': 2}, 'Hello world')
         DBSession.add(task)
@@ -165,6 +171,7 @@ class TestTask(unittest.TestCase):
         expected = "func4test (1, 2) {'a': 1, 'b': 2}"
         self.assertEqual(res, expected)
         self.assertEqual(task.result, expected)
+        self.assertEqual(task.status, models.TASK_STATUS_FINISHED)
 
         o = Class4Test()
         task = Task.create(o.run)
@@ -173,3 +180,10 @@ class TestTask(unittest.TestCase):
         expected = "Class4Test.run is called"
         self.assertEqual(res, expected)
         self.assertEqual(task.result, expected)
+        self.assertEqual(task.status, models.TASK_STATUS_FINISHED)
+
+        task = Task.create(func4testfailed)
+        DBSession.add(task)
+        res = task.perform()
+        self.assertIn('Failing function', res)
+        self.assertEqual(task.status, models.TASK_STATUS_FAILED)

@@ -46,8 +46,9 @@ class TaskRunner():
 
             with transaction.manager:
                 task.status = models.TASK_STATUS_IN_PROGRESS
+                models.DBSession.add(task)
+            with transaction.manager:
                 task.perform()
-                task.status = models.TASK_STATUS_FINISHED
                 models.DBSession.add(task)
             time.sleep(2)
 
