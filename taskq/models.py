@@ -131,10 +131,10 @@ class Task(Base):
     def perform(self):
         """Call the function with its parameters
         """
-        func = self.get_func()
-        self._args = self._args or []
-        self._kw = self._kw or {}
         try:
+            func = self.get_func()
+            self._args = self._args or []
+            self._kw = self._kw or {}
             self.result = func(*self._args, **self._kw)
             self.status = TASK_STATUS_FINISHED
         except:
