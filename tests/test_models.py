@@ -105,6 +105,7 @@ class TestTask(unittest.TestCase):
         DBSession.add(task)
         self.assertEqual(task.func, expected)
         self.assertEqual(task.description, 'func4test')
+        self.assertTrue(task.creation_date)
 
         # With parameters
         expected = {
@@ -164,6 +165,8 @@ class TestTask(unittest.TestCase):
         self.assertEqual(res, expected)
         self.assertEqual(task.result, expected)
         self.assertEqual(task.status, models.TASK_STATUS_FINISHED)
+        self.assertTrue(task.start_date)
+        self.assertTrue(task.end_date)
 
         task = Task.create(func4test, [1, 2], {'a': 1, 'b': 2}, 'Hello world')
         DBSession.add(task)

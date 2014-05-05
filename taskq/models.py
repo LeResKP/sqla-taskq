@@ -7,6 +7,7 @@ from sqlalchemy import (
     String,
     Boolean,
     PickleType,
+    DateTime,
     UnicodeText,
     create_engine,
 )
@@ -23,6 +24,7 @@ import transaction
 import inspect
 import importlib
 import logging
+import datetime
 
 log = logging.getLogger(__name__)
 
@@ -61,6 +63,10 @@ class Task(Base):
     result = Column(UnicodeText, nullable=True)
     status = Column(String, nullable=False, default=TASK_STATUS_WAITING)
     owner = Column(String, nullable=True)
+    creation_date = Column(DateTime, nullable=False,
+                           default=datetime.datetime.utcnow)
+    start_date = Column(DateTime, nullable=True)
+    end_date = Column(DateTime, nullable=True)
 
     def __init__(self):
         for p, d in self._func_params:
@@ -135,9 +141,11 @@ class Task(Base):
             func = self.get_func()
             self._args = self._args or []
             self._kw = self._kw or {}
+            self.start_date = datetime.datetime.utcnow()
             self.result = func(*self._args, **self._kw)
             self.status = TASK_STATUS_FINISHED
         except:
             self.result = traceback.format_exc()
             self.status = TASK_STATUS_FAILED
+        self.end_date = datetime.datetime.utcnow()
         return self.result
