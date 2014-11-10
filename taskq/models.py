@@ -137,15 +137,29 @@ class Task(Base):
     def perform(self):
         """Call the function with its parameters
         """
+        idtask = self.idtask
         try:
+            log.debug('Performing task %i: %s' % (idtask,
+                                                  self.description))
+
+            log.debug('instance: %s' % self._instance)
+            log.debug('function: %s' % self._func_name)
+            log.debug('args: %s' % self._args)
+            log.debug('kw: %s' % self._kw)
             func = self.get_func()
             self._args = self._args or []
             self._kw = self._kw or {}
             self.start_date = datetime.datetime.utcnow()
             self.result = func(*self._args, **self._kw)
             self.status = TASK_STATUS_FINISHED
+            self.end_date = datetime.datetime.utcnow()
+            log.debug('The task %i is finished in %s' % (
+                idtask,
+                self.end_date - self.start_date)
+            )
         except:
+            log.exception('The task %i has failed' % idtask)
             self.result = traceback.format_exc()
             self.status = TASK_STATUS_FAILED
-        self.end_date = datetime.datetime.utcnow()
+            self.end_date = datetime.datetime.utcnow()
         return self.result
