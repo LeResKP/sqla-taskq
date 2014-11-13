@@ -1,7 +1,5 @@
-import time
-import transaction
 from daemon import runner
-from taskq import models
+from taskq import command
 
 
 class TaskDaemonRunner(runner.DaemonRunner):
@@ -14,8 +12,8 @@ class TaskDaemonRunner(runner.DaemonRunner):
         else:
             message += ['Daemon not running']
 
-        tasks = models.Task.query.filter_by(
-            status=models.TASK_STATUS_WAITING).all()
+        tasks = self.app.models.Task.query.filter_by(
+            status=self.app.models.TASK_STATUS_WAITING).all()
         message += ['Number of waiting tasks: %s' % len(tasks)]
         runner.emit_message('\n'.join(message))
 
@@ -29,32 +27,27 @@ class TaskDaemonRunner(runner.DaemonRunner):
 
 class TaskRunner():
 
-    def __init__(self):
+    def __init__(self, models, timeout, sigterm):
         self.stdin_path = '/dev/null'
         self.stdout_path = '/dev/tty'
         self.stderr_path = '/dev/tty'
         self.pidfile_path = '/tmp/task-runner.pid'
-        self.pidfile_timeout = 5
+        self.pidfile_timeout = timeout
+        self.models = models
+        self.sigterm = sigterm
 
     def run(self):
-        while True:
-            task = models.Task.query.filter_by(
-                status=models.TASK_STATUS_WAITING).first()
-            if not task:
-                time.sleep(2)
-                continue
-
-            with transaction.manager:
-                task.status = models.TASK_STATUS_IN_PROGRESS
-                models.DBSession.add(task)
-            with transaction.manager:
-                task.perform()
-                models.DBSession.add(task)
-            time.sleep(2)
+        command.run(self.models, self.sigterm)
 
 
 def main():
-    app = TaskRunner()
+    dic = command.parse_options(parse_timeout=True)
+    # Import models here since we can have set the sqlalchemy url to use in the
+    # environment
+    from taskq import models
+    timeout = dic['timeout']
+    sigterm = dic['sigterm']
+    app = TaskRunner(models, timeout, sigterm)
     daemon_runner = TaskDaemonRunner(app)
     daemon_runner.do_action()
 

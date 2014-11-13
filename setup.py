@@ -26,6 +26,7 @@ setup(name='taskq',
       test_suite='nose.collector',
       tests_require=[
           'nose',
+          'mock',
       ],
       entry_points="""
       # -*- Entry points: -*-
