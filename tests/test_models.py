@@ -1,6 +1,7 @@
 import unittest
 from sqlalchemy import create_engine
 import transaction
+import os
 
 from taskq.models import (
     DBSession,
@@ -8,6 +9,9 @@ from taskq.models import (
     Task,
 )
 import taskq.models as models
+
+DB_NAME = 'test_taskq.db'
+DB_URL = 'sqlite:///%s' % DB_NAME
 
 
 def func4test(*args, **kw):
@@ -35,12 +39,14 @@ class Class4Test(object):
 class TestTask(unittest.TestCase):
 
     def setUp(self):
-        engine = create_engine('sqlite://')
+        engine = create_engine(DB_URL)
         DBSession.configure(bind=engine)
         Base.metadata.create_all(engine)
 
     def tearDown(self):
         transaction.abort()
+        if os.path.exists(DB_NAME):
+            os.remove(DB_NAME)
 
     def test___init__(self):
         task = Task()

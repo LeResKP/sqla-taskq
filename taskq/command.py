@@ -7,6 +7,9 @@ from optparse import OptionParser
 import logging.config
 import logging
 import transaction
+from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
+
 
 log = logging.getLogger(__name__)
 # Can be overwrite by a config file
@@ -24,26 +27,71 @@ def sigterm_handler(signal_number, stack_frame):
     log.info('Stopping the process by signal %i' % signal_number)
 
 
+def _lock_task(connection, models):
+    select_query = """
+    SELECT idtask, pid
+     FROM task
+    WHERE status='%s'
+      AND pid IS NULL
+    LIMIT 10
+    """ % (
+        models.TASK_STATUS_WAITING
+    )
+
+    rows = connection.execute(select_query)
+    for row in rows:
+        idtask = row[0]
+
+        query = """
+        UPDATE task
+           SET pid = %i,
+               status = '%s'
+        WHERE idtask = %i
+          AND pid IS NULL
+        """ % (
+            os.getpid(),
+            models.TASK_STATUS_IN_PROGRESS,
+            idtask,
+        )
+
+        updated_rows = connection.execute(text(query).execution_options(autocommit=True))
+        if updated_rows.rowcount:
+            return idtask
+
+
+def lock_task(models):
+    for i in range(5):
+        # Make many tries since when we use sqlite the DB can be locked.
+        try:
+            connection = models.engine.connect()
+            idtask = _lock_task(connection, models)
+            connection.close()
+            return idtask
+        except OperationalError:
+            pass
+
+    return None
+
+
+def _run(models):
+    idtask = lock_task(models)
+    if not idtask:
+        return False
+
+    task = models.Task.query.get(idtask)
+    with transaction.manager:
+        task.perform()
+        models.DBSession.add(task)
+    return True
+
+
 def run(models, sigterm=True):
     if sigterm:
         signal.signal(signal.SIGTERM, sigterm_handler)
     log.info('Process started')
     while loop:
-        task = models.Task.query.filter_by(
-            status=models.TASK_STATUS_WAITING).first()
-        if not task:
-            time.sleep(10)
-            continue
-
-        with transaction.manager:
-            task.status = models.TASK_STATUS_IN_PROGRESS
-            models.DBSession.add(task)
-
-        with transaction.manager:
-            models.DBSession.add(task)
-            task.perform()
-            models.DBSession.add(task)
-        time.sleep(2)
+        _run(models)
+        time.sleep(1)
     log.info('Process stopped')
 
 

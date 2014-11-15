@@ -67,6 +67,7 @@ class Task(Base):
                            default=datetime.datetime.utcnow)
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
+    pid = Column(Integer, nullable=True, default=None)
 
     def __init__(self):
         for p, d in self._func_params:
