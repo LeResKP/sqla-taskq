@@ -31,6 +31,6 @@ setup(name='taskq',
       entry_points="""
       # -*- Entry points: -*-
       [console_scripts]
-      taskq_daemon = taskq.run:main
+      taskq_daemon = taskq.run_daemon:main
       """,
       )
