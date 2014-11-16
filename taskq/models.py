@@ -69,6 +69,7 @@ class Task(Base):
     end_date = Column(DateTime, nullable=True)
     pid = Column(Integer, nullable=True, default=None)
     lock_date = Column(DateTime, nullable=True)
+    unique_key = Column(String, nullable=True)
 
     def __init__(self):
         for p, d in self._func_params:
@@ -79,7 +80,8 @@ class Task(Base):
         self.load_func()
 
     @classmethod
-    def create(cls, func, args=None, kw=None, description=None, owner=None):
+    def create(cls, func, args=None, kw=None, description=None, owner=None,
+               unique_key=None):
         with transaction.manager:
             task = cls()
             if inspect.ismethod(func):
@@ -102,6 +104,7 @@ class Task(Base):
             task._args = args
             task._kw = kw
             task.owner = owner
+            task.unique_key = unique_key
 
             task.func = task.dump_func()
             task.status = TASK_STATUS_WAITING

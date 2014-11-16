@@ -30,7 +30,7 @@ def sigterm_handler(signal_number, stack_frame):
 
 def _lock_task(connection, models):
     select_query = """
-    SELECT idtask, pid
+    SELECT idtask, unique_key
      FROM task
     WHERE status='%s'
       AND pid IS NULL
@@ -42,6 +42,19 @@ def _lock_task(connection, models):
     rows = connection.execute(select_query)
     for row in rows:
         idtask = row[0]
+        unique_key = row[1]
+
+        unique_key_extra_query = ''
+        if unique_key:
+            unique_key_extra_query = '''
+          AND unique_key NOT IN (
+            SELECT unique_key
+              FROM task
+             WHERE status = '%s'
+               AND unique_key = '%s'
+          )''' % (
+                models.TASK_STATUS_IN_PROGRESS,
+                unique_key)
 
         query = """
         UPDATE task
@@ -50,11 +63,12 @@ def _lock_task(connection, models):
                lock_date = '%s'
         WHERE idtask = %i
           AND pid IS NULL
-        """ % (
+          %s""" % (
             os.getpid(),
             models.TASK_STATUS_IN_PROGRESS,
             datetime.datetime.utcnow(),
             idtask,
+            unique_key_extra_query
         )
 
         updated_rows = connection.execute(text(query).execution_options(autocommit=True))
