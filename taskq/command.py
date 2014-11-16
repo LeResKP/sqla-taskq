@@ -9,6 +9,7 @@ import logging
 import transaction
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
+import datetime
 
 
 log = logging.getLogger(__name__)
@@ -45,12 +46,14 @@ def _lock_task(connection, models):
         query = """
         UPDATE task
            SET pid = %i,
-               status = '%s'
+               status = '%s',
+               lock_date = '%s'
         WHERE idtask = %i
           AND pid IS NULL
         """ % (
             os.getpid(),
             models.TASK_STATUS_IN_PROGRESS,
+            datetime.datetime.utcnow(),
             idtask,
         )
 

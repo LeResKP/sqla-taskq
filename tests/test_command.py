@@ -51,6 +51,7 @@ class TestCommand(unittest.TestCase):
         task = models.Task.query.get(1)
         self.assertEqual(task.status, models.TASK_STATUS_IN_PROGRESS)
         self.assertTrue(task.pid)
+        self.assertTrue(task.lock_date)
         idtask = command._lock_task(connection, models)
         self.assertEqual(idtask, None)
 
