@@ -22,6 +22,8 @@ setup(name='taskq',
           'transaction',
           'python-daemon',
           'zope.sqlalchemy',
+          'importlib',
+          'supervisor',
       ],
       test_suite='nose.collector',
       tests_require=[
