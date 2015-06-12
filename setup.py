@@ -34,5 +34,6 @@ setup(name='taskq',
       # -*- Entry points: -*-
       [console_scripts]
       taskq_daemon = taskq.run_daemon:main
+      taskq_initializedb = taskq.scripts.initializedb:main
       """,
       )
