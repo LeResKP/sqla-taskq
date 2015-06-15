@@ -10,6 +10,7 @@ import transaction
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 import datetime
+import sys
 
 
 log = logging.getLogger(__name__)
@@ -26,6 +27,13 @@ def sigterm_handler(signal_number, stack_frame):
     global loop
     loop = False
     log.info('Stopping the process by signal %i' % signal_number)
+
+
+def sigterm_kill_handler(signal_number, stack_frame):
+    global loop
+    loop = False
+    log.info('Killing the process by signal %i' % signal_number)
+    sys.exit(0)
 
 
 def _lock_task(connection, models):
@@ -105,6 +113,9 @@ def _run(models):
 def run(models, sigterm=True):
     if sigterm:
         signal.signal(signal.SIGTERM, sigterm_handler)
+    else:
+        signal.signal(signal.SIGTERM, sigterm_kill_handler)
+
     log.info('Process started')
     while loop:
         _run(models)
