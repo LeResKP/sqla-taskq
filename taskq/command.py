@@ -164,7 +164,7 @@ def parse_options(argv=sys.argv, parse_timeout=False):
         help="SqlAlchemy url to access the DB",
         metavar="URL")
     parser.add_option(
-        "-c", dest="config_filename",
+        "-c", "--config-file", dest="config_filename",
         help="Filename containing the logging config",
         metavar="FILE")
 
