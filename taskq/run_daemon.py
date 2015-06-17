@@ -27,17 +27,17 @@ class TaskDaemonRunner(runner.DaemonRunner):
 
 class TaskRunner():
 
-    def __init__(self, models, timeout, sigterm):
+    def __init__(self, models, timeout, kill):
         self.stdin_path = '/dev/null'
         self.stdout_path = '/dev/tty'
         self.stderr_path = '/dev/tty'
         self.pidfile_path = '/tmp/task-runner.pid'
         self.pidfile_timeout = timeout
         self.models = models
-        self.sigterm = sigterm
+        self.kill = kill
 
     def run(self):
-        command.run(self.models, self.sigterm)
+        command.run(self.models, self.kill)
 
 
 def main():
@@ -46,8 +46,8 @@ def main():
     # environment
     from taskq import models
     timeout = dic['timeout']
-    sigterm = dic['sigterm']
-    app = TaskRunner(models, timeout, sigterm)
+    kill = dic['kill']
+    app = TaskRunner(models, timeout, kill)
     daemon_runner = TaskDaemonRunner(app)
     daemon_runner.do_action()
 

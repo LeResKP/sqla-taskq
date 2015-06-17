@@ -94,17 +94,17 @@ class TestCommand(unittest.TestCase):
             config.add_section('taskq')
             res = command.parse_config_file('/fake')
             expected = {
-                'sigterm': True,
+                'kill': False,
                 'timeout': 60,
             }
             self.assertEqual(res, expected)
 
-            config.set('taskq', 'sigterm', 'false')
+            config.set('taskq', 'kill', 'true')
             config.set('taskq', 'timeout', '5')
             config.set('taskq', 'sqla_url', '//my_url')
             res = command.parse_config_file('/fake')
             expected = {
-                'sigterm': False,
+                'kill': True,
                 'timeout': 5,
                 'sqla_url': '//my_url',
             }
@@ -113,7 +113,7 @@ class TestCommand(unittest.TestCase):
     def test_parse_options(self):
         res = command.parse_options([])
         expected = {
-            'sigterm': True,
+            'kill': False,
             'sqla_url': None,
             'config_filename': None,
         }
@@ -121,29 +121,29 @@ class TestCommand(unittest.TestCase):
 
         res = command.parse_options([], parse_timeout=True)
         expected = {
-            'sigterm': True,
+            'kill': False,
             'sqla_url': None,
             'config_filename': None,
             'timeout': 60,
         }
         self.assertEqual(res, expected)
 
-        options = ['-s', '-t', '90', '-u', 'sqlite://fake.db']
+        options = ['-k', '-t', '90', '-u', 'sqlite://fake.db']
         res = command.parse_options(options, parse_timeout=True)
         expected = {
-            'sigterm': False,
+            'kill': False,
             'sqla_url': 'sqlite://fake.db',
             'config_filename': None,
             'timeout': 90,
         }
         self.assertEqual(res, expected)
 
-        options = ['-s', '-t', '90',
+        options = ['-k', '-t', '90',
                    '-u', 'sqlite://fake.db',
                    '-c', 'fake.ini']
         res = command.parse_options(options, parse_timeout=True)
         expected = {
-            'sigterm': False,
+            'kill': False,
             'sqla_url': 'sqlite://fake.db',
             'config_filename': 'fake.ini',
             'timeout': 90,
@@ -157,7 +157,7 @@ class TestCommand(unittest.TestCase):
             res = command.parse_config_file('/fake')
 
             expected = {
-                'sigterm': True,
+                'kill': False,
                 'timeout': 5,
             }
             self.assertEqual(res, expected)

@@ -110,11 +110,11 @@ def _run(models):
     return True
 
 
-def run(models, sigterm=True):
-    if sigterm:
-        signal.signal(signal.SIGTERM, sigterm_handler)
-    else:
+def run(models, kill=False):
+    if kill:
         signal.signal(signal.SIGTERM, sigterm_kill_handler)
+    else:
+        signal.signal(signal.SIGTERM, sigterm_handler)
 
     log.info('Process started')
     while loop:
@@ -144,10 +144,10 @@ def parse_config_file(filename):
     if 'sqla_url' in items:
         dic['sqla_url'] = config.get('taskq', 'sqla_url')
 
-    if 'sigterm' in items:
-        dic['sigterm'] = config.getboolean('taskq', 'sigterm')
+    if 'kill' in items:
+        dic['kill'] = config.getboolean('taskq', 'kill')
     else:
-        dic['sigterm'] = True
+        dic['kill'] = False
 
     if 'timeout' in items:
         dic['timeout'] = config.getint('taskq', 'timeout')
@@ -169,10 +169,10 @@ def parse_options(argv=sys.argv, parse_timeout=False):
         metavar="FILE")
 
     parser.add_option(
-        "-s", "--nosigterm", dest="sigterm",
-        action="store_false",
-        default=True,
-        help="Don't wait the process in progress to be finished")
+        "-k", "--kill", dest="kill",
+        action="store_true",
+        default=False,
+        help="Don't wait the process in progress to be finished, kill it")
 
     if parse_timeout:
         parser.add_option(
