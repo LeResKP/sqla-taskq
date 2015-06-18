@@ -16,7 +16,7 @@ Engine settings
 .. code-block:: python
 
     from sqlalchemy import engine_from_config
-    import taskq.models as taskqm
+    import sqla_taskq.models as sqla_taskqm
 
     settings = {
         'sqlalchemy.url': 'sqlite:///tmp/myproject.sqlite'
@@ -24,9 +24,9 @@ Engine settings
     engine = engine_from_config(settings, 'sqlalchemy.')
     # You can set the engine for your project here
 
-    # taskq should use the same engine
-    taskqm.DBSession.configure(bind=engine)
-    taskqm.Base.metadata.bind = engine
+    # sqla-taskq should use the same engine
+    sqla_taskqm.DBSession.configure(bind=engine)
+    sqla_taskqm.Base.metadata.bind = engine
 
 
 Creating DB table
@@ -46,11 +46,11 @@ Creating DB table
     .. code-block:: bash
 
         # Example with a sqlite dialect
-        export TASKQ_SQLALCHEMY_URL=sqlite:////tmp/taskq.db
-        taskq_initializedb
+        export SQLA_TASKQ_SQLALCHEMY_URL=sqlite:////tmp/sqla_taskq.db
+        sqla_taskq_initializedb
 
         # Your can check you have created the database:
-        ll /tmp/taskq.db
+        ll /tmp/sqla_taskq.db
 
 
 .. note:: if a database already exists for the given dialect, the database will not be erased, it will just add the new table.
@@ -66,7 +66,7 @@ Here is an example:
 
 .. code-block:: bash
 
-    from taskq.models import Task
+    from sqla_taskq.models import Task
     args = [1, 2]
     kw = {'a': 1, 'b': 2}
     Task.create(mymodule.myfunction, args, kw)
@@ -81,35 +81,35 @@ Before running the daemon make sure the database is created. There is 3 ways to 
 
 .. code-block:: bash
 
-    export TASKQ_SQLALCHEMY_URL=sqlite:////tmp/taskq.db
-    taskq_daemon start
+    export SQLA_TASKQ_SQLALCHEMY_URL=sqlite:////tmp/sqla_taskq.db
+    sqla_taskq_daemon start
 
 * Using the '-u' parameters
 
 .. code-block:: bash
 
-    taskq_daemon -u sqlite:////tmp/taskq.db start
+    sqla_taskq_daemon -u sqlite:////tmp/sqla_taskq.db start
 
 * Using a config file
 
-We suppose we have a file named /tmp/taskq.ini with this content
+We suppose we have a file named /tmp/sqla_taskq.ini with this content
 
 .. code-block:: ini
 
-    [taskq]
-    sqla_url = sqlite:////tmp/taskq.db
+    [sqla_taskq]
+    sqla_url = sqlite:////tmp/sqla_taskq.db
 
 You can call the daemon like this
 
 .. code-block:: bash
 
-    taskq_daemon start -c /tmp/taskq.ini
+    sqla_taskq_daemon start -c /tmp/sqla_taskq.ini
 
     # Daemon status
-    taskq_daemon status
+    sqla_taskq_daemon status
 
     # Stop the daemon
-    taskq_daemon stop
+    sqla_taskq_daemon stop
 
 .. note:: If the daemon is running, passing parameters to the status or the stop function will have not effect.
 
@@ -117,9 +117,9 @@ You can call the daemon like this
 Command line and file parameters
 ---------------------------------
 
-.. note:: You can run taskq_daemon --help
+.. note:: You can run sqla_taskq_daemon --help
 
-``-u/--url`` <str>: the sqlalchemy url to use (like sqlite:////tmp/taskq.db)
+``-u/--url`` <str>: the sqlalchemy url to use (like sqlite:////tmp/sqla_taskq.db)
 Config file name: ``sqla_url``
 
 ``-t/--timeoout`` <int> (Default: 60s): The timeout in second the daemon wait before killing running task after a stop. No effect if ``-k`` is passed.
@@ -137,14 +137,14 @@ Config file name: ``kill``
 Supervisor
 ==========
 
-taskq can be run with supervisor.
+sqla-taskq can be run with supervisor.
 
-You can add this config to your supervisor config or create a new one like in `this example file <https://github.com/LeResKP/taskq/blob/develop/taskq/examples/supervisor.conf>`_.
+You can add this config to your supervisor config or create a new one like in `this example file <https://github.com/LeResKP/sqla-taskq/blob/develop/sqla-taskq/examples/supervisor.conf>`_.
 
 .. code-block:: ini
 
-    [program:taskq]
-    command=python taskq/run_supervisor.py
+    [program:sqla_taskq]
+    command=python sqla_taskq/run_supervisor.py
     process_name=%(program_name)s-%(process_num)01d
     numprocs = 4
 
@@ -157,19 +157,19 @@ You have to clone the repository from github and execute the following command l
 
 .. code-block:: bash
 
-    git clone https://github.com/LeResKP/taskq.git
-    cd taskq
-    mkvirtualenv taskq-env
+    git clone https://github.com/LeResKP/sqla-taskq.git
+    cd sqla_taskq
+    mkvirtualenv sqla_taskq-env
     python setup.py develop
-    taskq_initializedb
-    python taskq/examples/add_tasks.py
+    sqla_taskq_initializedb
+    python sqla_taskq/examples/add_tasks.py
 
 Now we will just run the daemon to let it execute the tasks
 
 
 .. code-block:: bash
 
-    python taskq/run_daemon.py start
+    python sqla_taskq/run_daemon.py start
 
 You should see the output on your terminal::
 
@@ -184,7 +184,7 @@ Now you can stop the daemon
 
 .. code-block:: bash
 
-    python taskq/run_daemon.py stop
+    python sqla_taskq/run_daemon.py stop
 
 
 Testing with supervisor
@@ -192,16 +192,16 @@ Testing with supervisor
 
 .. code-block:: bash
 
-    python taskq/examples/add_tasks.py
+    python sqla_taskq/examples/add_tasks.py
 
     # Starting supervisor
-    supervisord -c taskq/examples/supervisor.conf
+    supervisord -c sqla_taskq/examples/supervisor.conf
 
     # Status
-    supervisorctl -c taskq/examples/supervisor.conf status
+    supervisorctl -c sqla_taskq/examples/supervisor.conf status
 
     # Stop the process
-    supervisorctl -c taskq/examples/supervisor.conf stop all
+    supervisorctl -c sqla_taskq/examples/supervisor.conf stop all
 
     # Kill supervisord
     killall supervisord
