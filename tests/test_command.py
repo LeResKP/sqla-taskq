@@ -3,18 +3,18 @@ from mock import patch, Mock
 import os
 from sqlalchemy import create_engine
 import ConfigParser
-from taskq import command
-from taskq.models import (
+from sqla_taskq import command
+from sqla_taskq.models import (
     DBSession,
     Base,
     Task,
 )
-import taskq.models as models
+import sqla_taskq.models as models
 import transaction
 import multiprocessing
 
 
-DB_NAME = 'test_taskq.db'
+DB_NAME = 'test_sqla_taskq.db'
 DB_URL = 'sqlite:///%s' % DB_NAME
 
 
@@ -90,8 +90,8 @@ class TestCommand(unittest.TestCase):
                 self.assertEqual(res, None)
                 m.assert_called_with('/fake')
 
-            # No option in taskq section, we get the default
-            config.add_section('taskq')
+            # No option in sqla_taskq section, we get the default
+            config.add_section('sqla_taskq')
             res = command.parse_config_file('/fake')
             expected = {
                 'kill': False,
@@ -99,9 +99,9 @@ class TestCommand(unittest.TestCase):
             }
             self.assertEqual(res, expected)
 
-            config.set('taskq', 'kill', 'true')
-            config.set('taskq', 'timeout', '5')
-            config.set('taskq', 'sqla_url', '//my_url')
+            config.set('sqla_taskq', 'kill', 'true')
+            config.set('sqla_taskq', 'timeout', '5')
+            config.set('sqla_taskq', 'sqla_url', '//my_url')
             res = command.parse_config_file('/fake')
             expected = {
                 'kill': True,
@@ -131,7 +131,7 @@ class TestCommand(unittest.TestCase):
         options = ['-k', '-t', '90', '-u', 'sqlite://fake.db']
         res = command.parse_options(options, parse_timeout=True)
         expected = {
-            'kill': False,
+            'kill': True,
             'sqla_url': 'sqlite://fake.db',
             'config_filename': None,
             'timeout': 90,
@@ -143,7 +143,7 @@ class TestCommand(unittest.TestCase):
                    '-c', 'fake.ini']
         res = command.parse_options(options, parse_timeout=True)
         expected = {
-            'kill': False,
+            'kill': True,
             'sqla_url': 'sqlite://fake.db',
             'config_filename': 'fake.ini',
             'timeout': 90,
@@ -152,8 +152,8 @@ class TestCommand(unittest.TestCase):
 
         config = ConfigParser.RawConfigParser()
         with patch('ConfigParser.ConfigParser', return_value=config):
-            config.add_section('taskq')
-            config.set('taskq', 'timeout', '5')
+            config.add_section('sqla_taskq')
+            config.set('sqla_taskq', 'timeout', '5')
             res = command.parse_config_file('/fake')
 
             expected = {

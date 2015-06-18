@@ -3,14 +3,14 @@ from sqlalchemy import create_engine
 import transaction
 import os
 
-from taskq.models import (
+from sqla_taskq.models import (
     DBSession,
     Base,
     Task,
 )
-import taskq.models as models
+import sqla_taskq.models as models
 
-DB_NAME = 'test_taskq.db'
+DB_NAME = 'test_sqla_taskq.db'
 DB_URL = 'sqlite:///%s' % DB_NAME
 
 

@@ -1,5 +1,5 @@
 from daemon import runner
-from taskq import command
+from sqla_taskq import command
 
 
 class TaskDaemonRunner(runner.DaemonRunner):
@@ -44,7 +44,7 @@ def main():
     dic = command.parse_options(parse_timeout=True)
     # Import models here since we can have set the sqlalchemy url to use in the
     # environment
-    from taskq import models
+    from sqla_taskq import models
     timeout = dic['timeout']
     kill = dic['kill']
     app = TaskRunner(models, timeout, kill)

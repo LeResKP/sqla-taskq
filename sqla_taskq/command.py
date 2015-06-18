@@ -135,22 +135,22 @@ def parse_config_file(filename):
         log.info('No section loggers in %s' % filename)
 
     try:
-        items = dict(config.items('taskq')).keys()
+        items = dict(config.items('sqla_taskq')).keys()
     except ConfigParser.NoSectionError:
-        log.info('No section taskq in %s' % filename)
+        log.info('No section sqla_taskq in %s' % filename)
         return None
 
     dic = {}
     if 'sqla_url' in items:
-        dic['sqla_url'] = config.get('taskq', 'sqla_url')
+        dic['sqla_url'] = config.get('sqla_taskq', 'sqla_url')
 
     if 'kill' in items:
-        dic['kill'] = config.getboolean('taskq', 'kill')
+        dic['kill'] = config.getboolean('sqla_taskq', 'kill')
     else:
         dic['kill'] = False
 
     if 'timeout' in items:
-        dic['timeout'] = config.getint('taskq', 'timeout')
+        dic['timeout'] = config.getint('sqla_taskq', 'timeout')
     else:
         dic['timeout'] = 60
 
@@ -192,6 +192,6 @@ def parse_options(argv=sys.argv, parse_timeout=False):
         dic = vars(options)
 
     if dic.get('sqla_url'):
-        os.environ['TASKQ_SQLALCHEMY_URL'] = dic.get('sqla_url')
+        os.environ['SQLA_TASKQ_SQLALCHEMY_URL'] = dic.get('sqla_url')
 
     return dic

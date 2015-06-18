@@ -3,7 +3,7 @@ import sys, os
 
 version = '0.0'
 
-setup(name='taskq',
+setup(name='sqla-taskq',
       version=version,
       description="",
       long_description="""\
@@ -33,7 +33,7 @@ setup(name='taskq',
       entry_points="""
       # -*- Entry points: -*-
       [console_scripts]
-      taskq_daemon = taskq.run_daemon:main
-      taskq_initializedb = taskq.scripts.initializedb:main
+      sqla_taskq_daemon = sqla_taskq.run_daemon:main
+      sqla_taskq_initializedb = sqla_taskq.scripts.initializedb:main
       """,
       )

@@ -28,9 +28,9 @@ import datetime
 
 log = logging.getLogger(__name__)
 
-sqlalchemy_url = 'sqlite:///taskq.db'
-if os.environ.get('TASKQ_SQLALCHEMY_URL'):
-    sqlalchemy_url = os.environ['TASKQ_SQLALCHEMY_URL']
+sqlalchemy_url = 'sqlite:///sqla-taskq.db'
+if os.environ.get('SQLA_TASKQ_SQLALCHEMY_URL'):
+    sqlalchemy_url = os.environ['SQLA_TASKQ_SQLALCHEMY_URL']
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base(DBSession)
