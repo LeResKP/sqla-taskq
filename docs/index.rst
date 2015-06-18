@@ -88,7 +88,7 @@ Before running the daemon make sure the database is created. There is 3 ways to 
 
 .. code-block:: bash
 
-    sqla_taskq_daemon -u sqlite:////tmp/sqla_taskq.db start
+    sqla_taskq_daemon start -u sqlite:////tmp/sqla_taskq.db
 
 * Using a config file
 
@@ -158,7 +158,7 @@ You have to clone the repository from github and execute the following command l
 .. code-block:: bash
 
     git clone https://github.com/LeResKP/sqla-taskq.git
-    cd sqla_taskq
+    cd sqla-taskq
     mkvirtualenv sqla_taskq-env
     python setup.py develop
     sqla_taskq_initializedb

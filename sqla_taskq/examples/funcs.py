@@ -5,10 +5,6 @@ def test_func1(*args, **kw):
     print 'test_func1 called'
     time.sleep(2)
     print 'test_func1 done'
-    # for i in range(100):
-    for i in range(1):
-        print i
-        time.sleep(1)
     return 1
 
 
