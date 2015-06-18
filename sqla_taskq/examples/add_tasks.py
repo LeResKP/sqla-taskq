@@ -1,6 +1,6 @@
-from taskq import models
+from sqla_taskq import models
 import transaction
-from taskq.examples import funcs
+from sqla_taskq.examples import funcs
 
 
 def add_task():

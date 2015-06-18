@@ -1,4 +1,4 @@
-from taskq import models
+from sqla_taskq import models
 
 
 def main():
