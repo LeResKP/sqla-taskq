@@ -139,7 +139,7 @@ Supervisor
 
 sqla-taskq can be run with supervisor.
 
-You can add this config to your supervisor config or create a new one like in `this example file <https://github.com/LeResKP/sqla-taskq/blob/develop/sqla-taskq/examples/supervisor.conf>`_.
+You can add this config to your supervisor config or create a new one like in `this example file <https://github.com/LeResKP/sqla-taskq/blob/master/sqla_taskq/examples/supervisor.conf>`_.
 
 .. code-block:: ini
 
