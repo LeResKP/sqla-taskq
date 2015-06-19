@@ -194,5 +194,5 @@ class TestTask(unittest.TestCase):
         task = Task.create(func4testfailed)
         DBSession.add(task)
         res = task.perform()
-        self.assertIn('Failing function', res)
+        self.assertTrue('Failing function' in res)
         self.assertEqual(task.status, models.TASK_STATUS_FAILED)
