@@ -5,9 +5,8 @@ version = '0.0'
 
 setup(name='sqla-taskq',
       version=version,
-      description="",
-      long_description="""\
-""",
+      description="Simple task queue executed by a daemon",
+      long_description=open('README.rst').read().split('Build Status')[0],
       classifiers=[
           'Operating System :: OS Independent',
           'Programming Language :: Python',
