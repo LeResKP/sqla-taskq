@@ -5,5 +5,5 @@ python:
 install:
     - travis_retry python setup.py install
     - travis_retry pip install python-coveralls
-script: python setup.py test
+script: python setup.py nosetests
 after_success: coveralls
