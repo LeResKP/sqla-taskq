@@ -32,10 +32,13 @@ setup(name='sqla-taskq',
           'importlib',
           'supervisor',
       ],
+      setup_requires=[
+          'nose',
+      ],
       test_suite='nose.collector',
       tests_require=[
-          'nose',
           'mock',
+          'coverage',
       ],
       entry_points="""
       # -*- Entry points: -*-
