@@ -2,6 +2,7 @@ import unittest
 from mock import patch, Mock
 import os
 from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
 import ConfigParser
 from sqla_taskq import command
 from sqla_taskq.models import (
@@ -30,6 +31,26 @@ def func4test(*args, **kw):
     return 'test'
 
 
+class TestSignal(unittest.TestCase):
+
+    def test_sigterm_handler(self):
+        self.assertEqual(command.loop, True)
+        command.sigterm_handler(666, None)
+        self.assertEqual(command.loop, False)
+        command.loop = True
+
+    def test_sigterm_kill_handler(self):
+        self.assertEqual(command.loop, True)
+        try:
+            command.sigterm_kill_handler(666, None)
+            assert(False)
+        except SystemExit, e:
+            self.assertEqual(str(e), '0')
+            self.assertEqual(command.loop, False)
+        finally:
+            command.loop = True
+
+
 class TestCommand(unittest.TestCase):
 
     def setUp(self):
@@ -55,6 +76,16 @@ class TestCommand(unittest.TestCase):
         idtask = command._lock_task(connection, models)
         self.assertEqual(idtask, None)
 
+        Task.create(func2lock, unique_key='mykey')
+        idtask = command._lock_task(connection, models)
+        self.assertEqual(idtask, 2)
+
+        Task.create(func2lock, unique_key='mykey')
+        # Will not lock this new task since it's the same unique key than the
+        # previous one which is not finished
+        idtask = command._lock_task(connection, models)
+        self.assertEqual(idtask, None)
+
     def test_lock_task(self):
         for i in range(4):
             Task.create(func2lock)
@@ -64,6 +95,21 @@ class TestCommand(unittest.TestCase):
         self.assertEqual(res, [1, 2, 3, 4])
         rows = models.Task.query.filter_by(pid=None).all()
         self.assertEqual(len(rows), 0)
+
+        class Err(OperationalError):
+            def __init__(self):
+                pass
+
+            def __str__(self):
+                return 'OperationalError'
+
+        def f(*args, **kw):
+            raise Err()
+
+        with patch('sqla_taskq.command._lock_task', side_effect=f):
+            # Don't fail on sqla error
+            idtask = command.lock_task(models)
+            self.assertEqual(idtask, None)
 
     def test__run(self):
         res = command._run(models)
@@ -75,6 +121,23 @@ class TestCommand(unittest.TestCase):
         self.assertEqual(task.status, models.TASK_STATUS_FINISHED)
         self.assertTrue(task.pid)
         self.assertEqual(task.result, 'test')
+
+    def test_run(self):
+        command.loop = False
+        res = command.run(models)
+        self.assertEqual(res, None)
+        Task.create(func4test)
+        res = command.run(models, kill=True)
+        self.assertEqual(res, None)
+        command.loop = True
+
+        def f(*args, **kw):
+            command.loop = False
+
+        with patch('sqla_taskq.command._run', side_effect=f):
+            res = command.run(models, kill=True)
+            self.assertEqual(res, None)
+        command.loop = True
 
     def test_parse_config_file(self):
         config = ConfigParser.RawConfigParser()

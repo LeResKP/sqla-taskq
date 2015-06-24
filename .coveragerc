@@ -3,3 +3,4 @@ omit =
     setup.py
     sqla_taskq/examples/*.py
     sqla_taskq/scripts/*.py
+    sqla_taskq/run_*.py

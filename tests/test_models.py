@@ -163,6 +163,15 @@ class TestTask(unittest.TestCase):
         self.assertTrue(task.func['_instance'])
         self.assertEqual(task.description, 'run')
 
+        task = Task.create('hello.world')
+        self.assertEqual(task._args, None)
+        self.assertEqual(task._func_name, 'hello.world')
+        self.assertEqual(task._kw, expected['_kw'])
+        self.assertEqual(task._instance, None)
+        DBSession.add(task)
+        self.assertEqual(task.func['_instance'], None)
+        self.assertEqual(task.description, 'hello.world')
+
     def test_perform(self):
         task = Task.create(func4test)
         DBSession.add(task)

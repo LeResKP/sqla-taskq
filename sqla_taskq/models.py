@@ -30,7 +30,7 @@ log = logging.getLogger(__name__)
 
 sqlalchemy_url = 'sqlite:///sqla-taskq.db'
 if os.environ.get('SQLA_TASKQ_SQLALCHEMY_URL'):
-    sqlalchemy_url = os.environ['SQLA_TASKQ_SQLALCHEMY_URL']
+    sqlalchemy_url = os.environ['SQLA_TASKQ_SQLALCHEMY_URL']  # pragma: no cover
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base(DBSession)
@@ -93,13 +93,15 @@ class Task(Base):
                 task._func_name = func
 
             task.description = description
-            if description is None:
-                if func.__doc__:
-                    task.description = func.__doc__.splitlines()[0]
 
-            if task.description is None:
-                # TODO: create a nice fallback
-                task.description = ('%s' % func.__name__)
+            if description is None:
+                if isinstance(func, basestring):
+                    task.description = ('%s' % func)
+                elif func.__doc__:
+                    task.description = func.__doc__.splitlines()[0]
+                else:
+                    # TODO: create a nice fallback
+                    task.description = ('%s' % func.__name__)
 
             task._args = args
             task._kw = kw
