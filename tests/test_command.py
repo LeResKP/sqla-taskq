@@ -43,7 +43,7 @@ class TestSignal(unittest.TestCase):
         self.assertEqual(command.loop, True)
         try:
             command.sigterm_kill_handler(666, None)
-            assert(False)
+            assert(False)  # pragma: no cover
         except SystemExit, e:
             self.assertEqual(str(e), '0')
             self.assertEqual(command.loop, False)
@@ -100,15 +100,12 @@ class TestCommand(unittest.TestCase):
             def __init__(self):
                 pass
 
-            def __str__(self):
-                return 'OperationalError'
-
         def f(*args, **kw):
             raise Err()
 
         with patch('sqla_taskq.command._lock_task', side_effect=f):
             # Don't fail on sqla error
-            idtask = command.lock_task(models)
+            idtask = func2lock()
             self.assertEqual(idtask, None)
 
     def test__run(self):

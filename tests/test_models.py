@@ -23,7 +23,6 @@ def func4testdoc(*args, **kw):
 
     This line should be ignored
     """
-    return 'func4testdoc %s %s' % (args, kw)
 
 
 def func4testfailed(*args, **kw):
