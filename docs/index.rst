@@ -7,7 +7,7 @@
 sqla-taskq
 ==========
 
-`sqla-taskq` in an asynchronous task queue using sqlalchemy to store the task. It's minimalist but very useful when you don't want to put in place big system like celery. The supported back end are the same as sqlalchemy.
+`sqla-taskq` in an asynchronous task queue using SQLAlchemy to store the task. It's minimalist but very useful when you don't want to put in place big system like celery. The supported back end are the same as `SQLAlchemy <http://docs.sqlalchemy.org/en/rel_1_0/dialects/index.html>`_.
 
 
 Engine settings

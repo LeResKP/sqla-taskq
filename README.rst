@@ -1,7 +1,7 @@
 Sqla-taskq
 ##########
 
-Sqla-taskq in an asynchronous task queue. It's minimalist and very useful when you don't want to put in place big system like celery. Since it's written in python it's very simple to add it in your python project. The back end should be one supported by sqlalchemy.
+Sqla-taskq in an asynchronous task queue. It's minimalist and very useful when you don't want to put in place big system like celery. Since it's written in python it's very simple to add it in your python project. The back end should be one supported by `SQLAlchemy <http://docs.sqlalchemy.org/en/rel_1_0/dialects/index.html>`_.
 
 
 Documentation is hosted at `ReadTheDocs <http://sqla-taskq.rtfd.org>`_.
