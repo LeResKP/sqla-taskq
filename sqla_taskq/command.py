@@ -38,14 +38,25 @@ def sigterm_kill_handler(signal_number, stack_frame):
 
 def _lock_task(connection, models):
     select_query = """
+(
     SELECT MIN(idtask) AS idtask, unique_key
      FROM task
     WHERE status='%s'
       AND pid IS NULL
- GROUP BY COALESCE(unique_key, CAST(idtask AS VARCHAR(255)))
+      AND unique_key IS NOT NULL
+ GROUP BY unique_key
     LIMIT 5
+) UNION (
+    SELECT idtask, unique_key
+     FROM task
+    WHERE status='%s'
+      AND pid IS NULL
+      AND unique_key IS NULL
+    LIMIT 5
+)
     """ % (
-        models.TASK_STATUS_WAITING
+        models.TASK_STATUS_WAITING,
+        models.TASK_STATUS_WAITING,
     )
 
     rows = connection.execute(select_query)
@@ -95,6 +106,7 @@ def lock_task(models):
             return idtask
         except OperationalError:
             pass
+        time.sleep(10)
 
     return None
 
