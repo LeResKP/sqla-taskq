@@ -138,6 +138,8 @@ class Task(Base):
             return getattr(self._instance, self._func_name)
 
         module_name, attribute = self._func_name.rsplit('.', 1)
+        # HACK!!
+        importlib.import_module('waxe.core')
         module = importlib.import_module(module_name)
         return getattr(module, attribute)
 
